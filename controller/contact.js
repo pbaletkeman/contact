@@ -89,10 +89,10 @@ function createInsertSQL(contact) {
   #birthDate;
   #email;
   */
-  sqlString[]
-  sqlValues[]
-  if (contact.firstName){
+  sqlString = [];
+  sqlValues = [];
+  if (contact.firstName) {
     sqlString.push("firstName");
-    sqlValues.push(contact.firstName)
+    sqlValues.push(contact.firstName);
   }
 }
