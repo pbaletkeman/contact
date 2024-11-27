@@ -1,7 +1,8 @@
 import Router from "express-promise-router";
-import * as db from "../db/index.js";
-
 import bodyParser from "body-parser";
+
+import * as db from "../db/index.js";
+import Contact from "../models/contact.js";
 
 // create a new express-promise-router
 // this has the same API as the normal express router except
@@ -39,6 +40,10 @@ router.post("/", jsonParser, function (req, res) {
   console.log("POST request received");
   console.log("Req");
   console.log(req.body);
+  const contact = new Contact().createFromJSON(req.body);
+  // console.log(contact.pretty());
+  console.log("createInsertSQL");
+  createInsertSQL(contact);
   res.writeHead(200, { "Content-Type": "application/json" });
   var response = { response: "This is POST method." };
   console.log(response);
@@ -67,3 +72,27 @@ router.delete("/", function (req, res) {
 
 // const res = await db.query(text, values);
 // console.log(res.rows[0]);
+
+function createInsertSQL(contact) {
+  /*
+  #firstName;
+  #lastName;
+  #middleName;
+  #street1;
+  #street2;
+  #city;
+  #province;
+  #postalCode;
+  #country;
+  #title;
+  #phone;
+  #birthDate;
+  #email;
+  */
+  sqlString[]
+  sqlValues[]
+  if (contact.firstName){
+    sqlString.push("firstName");
+    sqlValues.push(contact.firstName)
+  }
+}

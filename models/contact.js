@@ -15,7 +15,7 @@ class Contact {
   #email;
 
   set contactId(contactId) {
-    this.contactId = contactId;
+    this.#contactId = contactId;
   }
 
   get contactId() {
@@ -125,7 +125,65 @@ class Contact {
   get email() {
     return this.#email;
   }
+
+  createFromJSON = function (body) {
+    if (!body) {
+      return new Contact();
+    }
+    let contact = new Contact();
+    contact.contactId = body.contactId ? body.contactId : null;
+    contact.firstName = body.firstName ? body.firstName : null;
+    contact.lastName = body.lastName ? body.lastName : null;
+    contact.middleName = body.middleName ? body.middleName : null;
+    contact.street1 = body.street1 ? body.street1 : null;
+    contact.street2 = body.street2 ? body.street2 : null;
+    contact.city = body.city ? body.city : null;
+    contact.province = body.province ? body.province : null;
+    contact.postalCode = body.postalCode ? body.postalCode : null;
+    contact.country = body.country ? body.country : null;
+    contact.title = body.title ? body.title : null;
+    contact.phone = body.phone ? body.phone : null;
+    contact.birthDate = body.birthDate ? body.birthDate : null;
+    contact.email = body.email ? body.email : null;
+    return contact;
+  };
+
+  pretty = function () {
+    let str =
+      '{"contact": {"contactId" : "' +
+      this.contactId +
+      '", "firstName" : "' +
+      this.firstName +
+      '", "lastName" : "' +
+      this.lastName +
+      '", "middleName" : "' +
+      this.middleName +
+      '",  "street1" : "' +
+      this.street1 +
+      '", "street2" : "' +
+      this.street2 +
+      '", "city" : "' +
+      this.city +
+      '", "province" : "' +
+      this.province +
+      '", "postalCode" : "' +
+      this.postalCode +
+      '", "country" : "' +
+      this.country +
+      '", "title" : "' +
+      this.title +
+      '", "phone" : "' +
+      this.phone +
+      '", "birthDate" : "' +
+      this.birthDate +
+      '", "email" : "' +
+      this.email +
+      '"}}';
+    return JSON.parse(str.replaceAll(null, "null"));
+  };
 }
+
+export default Contact;
 
 /*
 -- Table: public.contact
@@ -156,3 +214,14 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.contact
     OWNER to pete;
 */
+
+// class Person {
+//   constructor(name, age) {
+//     this.name = name; this.age = age;
+//   }
+//   toString() {
+//      return `Name: ${this.name}, Age: ${this.age}`; }
+
+//     }
+//     let person = new Person("John", 30);
+//     console.log(person.toString()); // Output: "Name: John, Age: 30"

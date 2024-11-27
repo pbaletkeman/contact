@@ -1,6 +1,6 @@
 import express from "express";
 import expressOasGenerator from "express-oas-generator";
-import mountRoutes from "./routes/index.js";
+import mountRoutes from "./controller/index.js";
 
 var app = express();
 
