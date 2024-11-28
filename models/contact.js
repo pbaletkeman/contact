@@ -186,42 +186,25 @@ class Contact {
 export default Contact;
 
 /*
--- Table: public.contact
+-- Table: contact
 
--- DROP TABLE IF EXISTS public.contact;
 
-CREATE TABLE IF NOT EXISTS public.contact
+CREATE TABLE IF NOT EXISTS contact
 (
-	contactid integer NOT NULL DEFAULT nextval('contact_contactid_seq'::regclass),
-    "firstName" character varying(50) COLLATE pg_catalog."default",
-    "lastName" character varying(50) COLLATE pg_catalog."default",
-    "middleName" character varying(50) COLLATE pg_catalog."default",
-    street1 character varying(150) COLLATE pg_catalog."default",
-    street2 character varying(150) COLLATE pg_catalog."default",
-    city character varying(100) COLLATE pg_catalog."default",
-    province character(5) COLLATE pg_catalog."default",
-    "postalCode" character varying(15) COLLATE pg_catalog."default",
-    country character(6) COLLATE pg_catalog."default",
-    title character(4) COLLATE pg_catalog."default",
-    phone character(10) COLLATE pg_catalog."default",
-    "birthDate" date,
-    "email" character varying(100) COLLATE pg_catalog."default",
+    contactid integer NOT NULL DEFAULT nextval('contact_contactid_seq'::regclass),
+    birthDate date,
+    title character(4),
+    province character(5),
+    country character(6),
+    phone character(10),
+    postalCode character varying(15),
+    firstName character varying(50),
+    lastName character varying(50),
+    middleName character varying(50),
+    city character varying(50),
+    street1 character varying(150),
+    street2 character varying(150),
+    email character varying(250),
     CONSTRAINT contact_pkey PRIMARY KEY (contactid)
 )
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.contact
-    OWNER to pete;
-*/
-
-// class Person {
-//   constructor(name, age) {
-//     this.name = name; this.age = age;
-//   }
-//   toString() {
-//      return `Name: ${this.name}, Age: ${this.age}`; }
-
-//     }
-//     let person = new Person("John", 30);
-//     console.log(person.toString()); // Output: "Name: John, Age: 30"
+  */
