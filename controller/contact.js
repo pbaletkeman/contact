@@ -36,17 +36,15 @@ router.get("/:id", function (req, res) {
   res.end(JSON.stringify(response));
 });
 
-router.post("/", jsonParser, function (req, res) {
-  console.log("POST request received");
-  console.log("Req");
-  console.log(req.body);
+router.post("/", jsonParser, async function (req, res) {
+  // console.log("POST request received");
+  // console.log("Req");
+  // console.log(req.body);
   const contact = new Contact().createFromJSON(req.body);
   // console.log(contact.pretty());
-  insertRecord(contact);
+  const inserted = await insertRecord(contact);
   res.writeHead(200, { "Content-Type": "application/json" });
-  var response = { response: "This is POST method." };
-  console.log(response);
-  res.end(JSON.stringify(response));
+  res.end(JSON.stringify(inserted));
 });
 
 router.put("/", function (req, res) {
@@ -146,7 +144,8 @@ async function insertRecord(contact) {
     sqlString.join('","') +
     '") VALUES (' +
     values +
-    ") RETURNING *";
+    ") RETURNING * ";
 
   const res = await db.query(sqlFields, sqlValues);
+  return res.rows;
 }
