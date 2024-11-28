@@ -47,12 +47,11 @@ router.post("/", jsonParser, async function (req, res) {
   res.end(JSON.stringify(inserted));
 });
 
-router.put("/", function (req, res) {
-  console.log("PUT request received");
+router.put("/", jsonParser, async function (req, res) {
+  const contact = new Contact().createFromJSON(req.body);
+  const updated = await updateRecord(contact);
   res.writeHead(200, { "Content-Type": "application/json" });
-  var response = { response: "This is PUT method." };
-  console.log(response);
-  res.end(JSON.stringify(response));
+  res.end(JSON.stringify(updated));
 });
 
 router.delete("/", function (req, res) {
@@ -62,6 +61,86 @@ router.delete("/", function (req, res) {
   console.log(response);
   res.end(JSON.stringify(response));
 });
+
+async function updateRecord(contact) {
+  let sqlString = "UPDATE contact set ";
+  let sqlValues = [];
+  let i = 0;
+  if (contact.firstName) {
+    i++;
+    sqlString += '"firstName" = $' + i + ",";
+    sqlValues.push(contact.firstName);
+  }
+  if (contact.lastName) {
+    i++;
+    sqlString += '"lastName" = $' + i + ",";
+    sqlValues.push(contact.lastName);
+  }
+  if (contact.middleName) {
+    i++;
+    sqlString += '"middleName" = $' + i + ",";
+    sqlValues.push(contact.middleName);
+  }
+  if (contact.street1) {
+    i++;
+    sqlString += '"street1" = $' + i + ",";
+    sqlValues.push(contact.street1);
+  }
+  if (contact.street2) {
+    i++;
+    sqlString += '"street2" = $' + i + ",";
+    sqlValues.push(contact.street2);
+  }
+  if (contact.city) {
+    i++;
+    sqlString += '"city" = $' + i + ",";
+    sqlValues.push(contact.city);
+  }
+  if (contact.province) {
+    i++;
+    sqlString += '"province" = $' + i + ",";
+    sqlValues.push(contact.province);
+  }
+  if (contact.postalCode) {
+    i++;
+    sqlString += '"postalCode" = $' + i + ",";
+    sqlValues.push(contact.postalCode);
+  }
+  if (contact.country) {
+    i++;
+    sqlString += '"country" = $' + i + ",";
+    sqlValues.push(contact.country);
+  }
+  if (contact.title) {
+    i++;
+    sqlString += '"title" = $' + i + ",";
+    sqlValues.push(contact.title);
+  }
+  if (contact.phone) {
+    i++;
+    sqlString += '"phone" = $' + i + ",";
+    sqlValues.push(contact.phone);
+  }
+  if (contact.birthDate) {
+    i++;
+    sqlString += '"birthDate" = $' + i + ",";
+    sqlValues.push(contact.birthDate);
+  }
+  if (contact.email) {
+    i++;
+    sqlString += '"email" = $' + i + ",";
+    sqlValues.push(contact.email);
+  }
+  i++;
+  sqlString =
+    sqlString.substring(0, sqlString.length - 1) +
+    " WHERE contactId = $" +
+    i +
+    " RETURNING * ";
+  sqlValues.push(contact.contactId);
+  const res = await db.query(sqlString, sqlValues, contact.contactId);
+  return res.rows;
+}
 
 async function insertRecord(contact) {
   /*
@@ -139,7 +218,7 @@ async function insertRecord(contact) {
   }
   values = values.substring(0, values.length - 2);
   const sqlFields =
-    "INSERT INTO contact(" +
+    "INSERT INTO contact (" +
     '"' +
     sqlString.join('","') +
     '") VALUES (' +
