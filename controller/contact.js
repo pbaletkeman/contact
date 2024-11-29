@@ -15,25 +15,43 @@ export default router;
 // create application/json parser
 var jsonParser = bodyParser.json();
 
-const result = await db.query("SELECT $1::text as message", ["Hello world!"]);
-console.log(result.rows[0]);
+// const result = await db.query("SELECT $1::text as message", ["Hello world!"]);
+// console.log(result.rows[0]);
 
-router.get("/", function (req, res) {
+const TABLE_NAME = "contact123";
+
+await initTable();
+
+// await seedTable();
+
+router.get("/sorted/:sortField?/:direction?", async function (req, res) {
   console.log("GET request received");
   res.writeHead(200, { "Content-Type": "application/json" });
-  var response = { response: "This is GET method." };
-  console.log(response);
-  res.end(JSON.stringify(response));
+  const rows = await getRecords(
+    null,
+    req.params["sortField"],
+    req.params["direction"]
+  );
+  res.end(JSON.stringify(rows));
 });
 
-router.get("/:id", function (req, res) {
+router.get("/:ids?/:sortField?/:direction?", async function (req, res) {
+  console.log("GET request received");
+  res.writeHead(200, { "Content-Type": "application/json" });
+  const rows = await getRecords(
+    req.params["ids"],
+    req.params["sortField"],
+    req.params["direction"]
+  );
+  res.end(JSON.stringify(rows));
+});
+
+router.get("/:id", async function (req, res) {
   console.log("GET /:id request received");
   res.writeHead(200, { "Content-Type": "application/json" });
-  var response = {
-    response: "This is GET method with id=" + req.params.id + ".",
-  };
-  console.log(response);
-  res.end(JSON.stringify(response));
+  // res.end(req.params["id"]);
+  const row = await getRecord(req.params["id"]);
+  res.end(JSON.stringify(row));
 });
 
 router.post("/", jsonParser, async function (req, res) {
@@ -54,122 +72,132 @@ router.put("/", jsonParser, async function (req, res) {
   res.end(JSON.stringify(updated));
 });
 
-router.delete("/", function (req, res) {
+router.delete("/:ids", async function (req, res) {
   console.log("DELETE request received");
   res.writeHead(200, { "Content-Type": "application/json" });
-  var response = { response: "This is DELETE method." };
-  console.log(response);
-  res.end(JSON.stringify(response));
+  const row = await deleteRecords(req.params["ids"]);
+  res.end(JSON.stringify(row));
 });
 
+async function deleteRecords(ids) {
+  const sqlString =
+    `DELETE FROM ${TABLE_NAME} WHERE "contactid" in (` + ids + `)`;
+  const res = await db.query(sqlString);
+  return res.rows;
+}
+
+async function getRecord(id) {
+  return await getRecords(id, null, null);
+}
+
+async function getRecords(ids, sortField, sortDirection) {
+  let sqlString = `SELECT "contactid", "firstname", "lastname", "middlename", "street1", "street2", "city", "province", "postalcode", "country", "title", "phone", "birthdate", "email" FROM ${TABLE_NAME} WHERE 1=1 `;
+  if (ids) {
+    sqlString += ` AND "contactid" in (` + ids + ") ";
+  }
+  if (sortField) {
+    sqlString += ` ORDER BY "` + sortField + `" `;
+  }
+  if (sortDirection) {
+    sqlString += sortDirection;
+  }
+  const res = await db.query(sqlString);
+  return res.rows;
+}
+
 async function updateRecord(contact) {
-  let sqlString = "UPDATE contact set ";
+  let sqlString = `UPDATE ${TABLE_NAME} set `;
   let sqlValues = [];
   let i = 0;
   if (contact.firstName) {
     i++;
-    sqlString += '"firstName" = $' + i + ",";
+    sqlString += `"firstname" = $` + i + `,`;
     sqlValues.push(contact.firstName);
   }
   if (contact.lastName) {
     i++;
-    sqlString += '"lastName" = $' + i + ",";
+    sqlString += `"lastname" = $` + i + `,`;
     sqlValues.push(contact.lastName);
   }
   if (contact.middleName) {
     i++;
-    sqlString += '"middleName" = $' + i + ",";
+    sqlString += `"middlename" = $` + i + `,`;
     sqlValues.push(contact.middleName);
   }
   if (contact.street1) {
     i++;
-    sqlString += '"street1" = $' + i + ",";
+    sqlString += `"street1" = $` + i + `,`;
     sqlValues.push(contact.street1);
   }
   if (contact.street2) {
     i++;
-    sqlString += '"street2" = $' + i + ",";
+    sqlString += `"street2" = $` + i + `,`;
     sqlValues.push(contact.street2);
   }
   if (contact.city) {
     i++;
-    sqlString += '"city" = $' + i + ",";
+    sqlString += `"city" = $` + i + `,`;
     sqlValues.push(contact.city);
   }
   if (contact.province) {
     i++;
-    sqlString += '"province" = $' + i + ",";
+    sqlString += `"province" = $` + i + `,`;
     sqlValues.push(contact.province);
   }
   if (contact.postalCode) {
     i++;
-    sqlString += '"postalCode" = $' + i + ",";
+    sqlString += `"postalcode" = $` + i + `,`;
     sqlValues.push(contact.postalCode);
   }
   if (contact.country) {
     i++;
-    sqlString += '"country" = $' + i + ",";
+    sqlString += `"country" = $` + i + `,`;
     sqlValues.push(contact.country);
   }
   if (contact.title) {
     i++;
-    sqlString += '"title" = $' + i + ",";
+    sqlString += `"title" = $` + i + `,`;
     sqlValues.push(contact.title);
   }
   if (contact.phone) {
     i++;
-    sqlString += '"phone" = $' + i + ",";
+    sqlString += `"phone" = $` + i + `,`;
     sqlValues.push(contact.phone);
   }
   if (contact.birthDate) {
     i++;
-    sqlString += '"birthDate" = $' + i + ",";
+    sqlString += `"birthdate" = $` + i + `,`;
     sqlValues.push(contact.birthDate);
   }
   if (contact.email) {
     i++;
-    sqlString += '"email" = $' + i + ",";
+    sqlString += `"email" = $` + i + `,`;
     sqlValues.push(contact.email);
   }
   i++;
   sqlString =
     sqlString.substring(0, sqlString.length - 1) +
-    " WHERE contactId = $" +
+    ` WHERE contactId = $` +
     i +
-    " RETURNING * ";
+    ` RETURNING * `;
   sqlValues.push(contact.contactId);
   const res = await db.query(sqlString, sqlValues, contact.contactId);
   return res.rows;
 }
 
 async function insertRecord(contact) {
-  /*
-  #firstName;
-  #lastName;
-  #middleName;
-  #street1;
-  #street2;
-  #city;
-  #province;
-  #postalCode;
-  #country;
-  #title;
-  #phone;
-  #birthDate;
-  #email;
-  */
   let sqlString = [];
   let sqlValues = [];
   if (contact.firstName) {
-    sqlString.push("firstName");
+    sqlString.push("firstname");
     sqlValues.push(contact.firstName);
   }
   if (contact.lastName) {
-    sqlString.push("lastName");
+    sqlString.push("lastname");
     sqlValues.push(contact.lastName);
   }
   if (contact.middleName) {
-    sqlString.push("middleName");
+    sqlString.push("middlename");
     sqlValues.push(contact.middleName);
   }
   if (contact.street1) {
@@ -189,7 +217,7 @@ async function insertRecord(contact) {
     sqlValues.push(contact.province);
   }
   if (contact.postalCode) {
-    sqlString.push("postalCode");
+    sqlString.push("postalcode");
     sqlValues.push(contact.postalCode);
   }
   if (contact.country) {
@@ -205,7 +233,7 @@ async function insertRecord(contact) {
     sqlValues.push(contact.phone);
   }
   if (contact.birthDate) {
-    sqlString.push("birthDate");
+    sqlString.push("birthdate");
     sqlValues.push(contact.birthDate);
   }
   if (contact.email) {
@@ -218,13 +246,44 @@ async function insertRecord(contact) {
   }
   values = values.substring(0, values.length - 2);
   const sqlFields =
-    "INSERT INTO contact (" +
-    '"' +
+    `INSERT INTO ${TABLE_NAME} (` +
+    `"` +
     sqlString.join('","') +
-    '") VALUES (' +
+    `") VALUES (` +
     values +
-    ") RETURNING * ";
+    `) RETURNING * `;
 
   const res = await db.query(sqlFields, sqlValues);
   return res.rows;
+}
+
+async function initTable() {
+  const sqlString = `CREATE TABLE IF NOT EXISTS ${TABLE_NAME}
+  (
+      contactid SERIAL PRIMARY KEY,
+      birthDate timestamp without time zone,
+      title character(4),
+      province character(5),
+      country character(6),
+      phone character(10),
+      postalCode character varying(15),
+      firstName character varying(50),
+      lastName character varying(50),
+      middleName character varying(50),
+      street1 character varying(150),
+      street2 character varying(150),
+      city character varying(100),
+      email character varying(250)
+  )`;
+  const res = await db.query(sqlString);
+  return res.rows;
+}
+
+async function seedTable() {
+  for (let i = 0; i < 10; i++) {
+    const sqlString = `INSERT INTO ${TABLE_NAME} ("firstname", "lastname", "middlename", "street1", "street2", "city", "province", "postalcode", "country", "title", "phone", "birthdate", "email")
+    VALUES ('firstName${i}', 'lastName${i}', 'middleName${i}', 'street1${i}', 'street2${i}', 'city${i}', 'pr${i}', 'postalCode${i}', 'count${i}', 'mr${i}', 'phone${i}', '2024-12-01', 'email${i}');`;
+    // console.log(sqlString);
+    const res = await db.query(sqlString);
+  }
 }

@@ -192,7 +192,7 @@ export default Contact;
 CREATE TABLE IF NOT EXISTS contact
 (
     contactid integer NOT NULL DEFAULT nextval('contact_contactid_seq'::regclass),
-    birthDate date,
+    birthDate timestamp without time zone,
     title character(4),
     province character(5),
     country character(6),
@@ -201,10 +201,11 @@ CREATE TABLE IF NOT EXISTS contact
     firstName character varying(50),
     lastName character varying(50),
     middleName character varying(50),
-    city character varying(50),
     street1 character varying(150),
     street2 character varying(150),
+    city character varying(100),
     email character varying(250),
     CONSTRAINT contact_pkey PRIMARY KEY (contactid)
 )
+
   */
